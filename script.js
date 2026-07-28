@@ -1,4 +1,4 @@
-const STORAGE_KEY='salesforceBAQuizProgressV2';
+const STORAGE_KEY='salesforceBAQuizProgressV3';
 let current=0,correct=0,wrongAttempts=0,answered=new Set();
 const jumpEl=document.querySelector('#jumpTo'),jumpButton=document.querySelector('#jumpButton');
 function buildJump(){jumpEl.innerHTML='';questions.forEach((q,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`Question ${i+1}${answered.has(i)?' ✓':''}`;jumpEl.appendChild(op)});}
