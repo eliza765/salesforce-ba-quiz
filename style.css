@@ -26,3 +26,18 @@ body, .app, .card, .modal-box { color: #17233c !important; }
 .saved-status{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:11px 16px;border-radius:14px;background:rgba(232,251,244,.95);border:1px solid #a9dfc5;color:#135c40;box-shadow:0 8px 22px rgba(20,100,65,.08)}
 .saved-status strong{font-size:1rem}.saved-status span{font-weight:700;color:#3d6f59}
 @media(max-width:600px){.saved-status{flex-direction:column;gap:3px;text-align:center}}
+
+/* Explanation text matches the multiple-choice option font size */
+.explanation,
+.explanation strong {
+  font-size: 1rem !important;
+  line-height: 1.55 !important;
+}
+
+/* Selecting a question immediately jumps there; the Go button is no longer needed. */
+.jump-nav #jumpButton { display: none !important; }
+.jump-nav { grid-template-columns: auto 1fr !important; }
+@media(max-width:600px){
+  .jump-nav { display:flex !important; }
+  .jump-nav select { width:100%; }
+}
