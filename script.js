@@ -1,4 +1,4 @@
-const STORAGE_KEY='salesforceBAQuizProgressV1';
+const STORAGE_KEY='salesforceBAQuizProgressV2';
 let current=0,correct=0,wrongAttempts=0,answered=new Set();
 const jumpEl=document.querySelector('#jumpTo'),jumpButton=document.querySelector('#jumpButton');
 function buildJump(){jumpEl.innerHTML='';questions.forEach((q,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`Question ${i+1}${answered.has(i)?' ✓':''}`;jumpEl.appendChild(op)});}
@@ -28,6 +28,17 @@ function splitEmbeddedExplanation(text){
  if(cut<0){const qmark=text.lastIndexOf('?'); const before=text.slice(0,qmark); cut=before.lastIndexOf('. ')+2;}
  return {explanation:text.slice('Explanation:'.length,cut).trim(),question:text.slice(cut).trim()};
 }
+function normalizeQuestionExplanations(){
+ for(let i=0;i<questions.length;i++){
+  const q=questions[i];
+  const cleaned=splitEmbeddedExplanation(q.question);
+  if(cleaned.explanation && i>0){
+   questions[i-1].explanation=cleaned.explanation;
+   q.question=cleaned.question;
+  }
+ }
+}
+normalizeQuestionExplanations();
 function render(){updateStats();updateJump();const q=questions[current];const cleaned=splitEmbeddedExplanation(q.question);qEl.textContent=cleaned.question;oEl.innerHTML='';fEl.textContent='';fEl.className='feedback';eEl.className='explanation hidden';eEl.innerHTML='';nEl.disabled=!answered.has(current);pEl.disabled=current===0;document.querySelector('#progress').textContent=`Question ${current+1} of ${questions.length}`;document.querySelector('#score').textContent=`Score: ${correct} / ${questions.length} (${Math.round((correct/questions.length)*100)}%)`;updateStats();document.querySelector('#bar').style.width=`${((current+1)/questions.length)*100}%`;q.options.forEach((x,i)=>{const b=document.createElement('button');b.className='option';b.textContent=`${String.fromCharCode(65+i)}. ${x}`;b.onclick=()=>answer(i,b);oEl.appendChild(b)});if(answered.has(current)){[...oEl.children].forEach(x=>x.disabled=true);fEl.textContent='Correct! 🎉 Great job!';fEl.className='feedback good';if(q.explanation){eEl.innerHTML='<strong>Explanation</strong><br>'+q.explanation;eEl.className='explanation'}}save();}
 function answer(i,b){const q=questions[current];const cleaned=splitEmbeddedExplanation(q.question);if(i===q.correctAnswer){if(!answered.has(current)){correct++;answered.add(current)}[...oEl.children].forEach(x=>x.disabled=true);b.classList.add('correct');fEl.textContent='Correct! 🎉 Great job!';fEl.className='feedback good';const explanationText=q.explanation||cleaned.explanation;if(explanationText){eEl.innerHTML='<strong>Explanation</strong><br>'+explanationText;eEl.className='explanation'}nEl.disabled=false;document.querySelector('#score').textContent=`Score: ${correct} / ${questions.length} (${Math.round((correct/questions.length)*100)}%)`;updateStats();save()}else{wrongAttempts++;updateStats();save();b.classList.add('wrong');fEl.textContent='Not quite — that’s okay. Try again! 😊';fEl.className='feedback try';setTimeout(()=>b.classList.remove('wrong'),700)}}
 nEl.onclick=()=>{if(current<questions.length-1){current++;render()}else{fEl.innerHTML=`<strong>🎉 Quiz complete!</strong><br>Your final score is <strong>${correct} / ${questions.length} points (${Math.round((correct/questions.length)*100)}%)</strong>.`;
