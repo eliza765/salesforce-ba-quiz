@@ -1,4 +1,5 @@
 const STORAGE_KEY='salesforceBAQuizProgressV4';
+const DEFAULT_QUESTIONS = questions.map(q => ({...q, options:[...q.options]}));
 let current=0,correct=0,wrongAttempts=0,answered=new Set();
 const jumpEl=document.querySelector('#jumpTo'),jumpButton=document.querySelector('#jumpButton');
 function buildJump(){jumpEl.innerHTML='';questions.forEach((q,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`Question ${i+1}${answered.has(i)?' ✓':''}`;jumpEl.appendChild(op)});}
@@ -27,6 +28,13 @@ fEl.className='feedback good final-score';nEl.disabled=true;save()}};
 pEl.onclick=()=>{if(current>0){current--;render()}};
 function reset(){current=0;correct=0;wrongAttempts=0;answered=new Set();clearSave();render()}
 document.querySelector('#restart').onclick=()=>{if(confirm('Start over? Your saved progress will be cleared.')) reset();};
+document.querySelector('#defaultOrder').onclick=()=>{
+ if(confirm('Return questions to the original order? Your saved progress will be cleared.')){
+   questions.splice(0,questions.length,...DEFAULT_QUESTIONS.map(q=>({...q,options:[...q.options]})));
+   current=0;correct=0;wrongAttempts=0;answered=new Set();clearSave();buildJump();render();
+   fEl.textContent='Questions restored to the default order.';fEl.className='feedback good';
+ }
+};
 document.querySelector('#shuffle').onclick=()=>{for(let i=questions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[questions[i],questions[j]]=[questions[j],questions[i]]}current=0;correct=0;wrongAttempts=0;answered=new Set();save();render();fEl.textContent='Questions shuffled! 🔀';fEl.className='feedback good'};
 const saved=localStorage.getItem(STORAGE_KEY);
 if(saved){try{const s=JSON.parse(saved);if(Array.isArray(s.questions)&&s.questions.length){questions.splice(0,questions.length,...s.questions);current=Math.min(s.current||0,questions.length-1);correct=s.correct||0;wrongAttempts=s.wrongAttempts||0;answered=new Set(s.answered||[]);updateSavedStatus(s.savedAt);buildJump();document.querySelector('#resumeModal').classList.remove('hidden');}else {buildJump();render();}}catch(e){clearSave();render();}}else {buildJump();render();}
